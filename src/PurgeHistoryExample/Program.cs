@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+var hostBuilder = new HostBuilder()
+    .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
@@ -37,7 +37,8 @@ var host = new HostBuilder()
                 options.Rules.Remove(defaultRule);
             }
         });
-    })
-    .Build();
+    });
+
+var host = hostBuilder.Build();
 
 host.Run();
