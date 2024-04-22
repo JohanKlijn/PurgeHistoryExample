@@ -155,7 +155,7 @@ namespace PurgeHistoryExample
 
             PurgeInstancesFilter filter = new PurgeInstancesFilter(fromDate, toDate, runtimeStatus);
             PurgeInstanceOptions purgeInstanceOptions = new PurgeInstanceOptions();
-            PurgeResult purgeResult = await client.PurgeAllInstancesAsync(filter, purgeInstanceOptions, CancellationToken.None).ConfigureAwait(true); // ConfigureAwait should be set to true in Azure functions.
+            PurgeResult purgeResult = await client.PurgeAllInstancesAsync(filter, CancellationToken.None).ConfigureAwait(true); // ConfigureAwait should be set to true in Azure functions.
 
             this.logger.LogInformation($"Purged {purgeResult.PurgedInstanceCount} instances.");
         }
