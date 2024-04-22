@@ -64,7 +64,44 @@ namespace PurgeHistoryExample
                 OrchestrationRuntimeStatus.Completed,
             };
 
-            await ClearItemsAsync(client, fromDate, toDate, statusesToPurge).ConfigureAwait(false);
+            bool failure = false;
+            try
+            {
+                await ClearItemsAsyncUsingPurgeAllInstances(client, fromDate, toDate, statusesToPurge).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                failure = true;
+                this.logger.LogError(exception, "Unable to clear completed items using {FunctionName}.", nameof(ClearItemsAsyncUsingPurgeAllInstances));
+            }
+
+            if (failure)
+            {
+                // If the purge failed, we will try to delete the items one by one.
+                await ClearItemsOneByOneAsync(client, fromDate, toDate, statusesToPurge).ConfigureAwait(false);
+            }
+        }
+
+        private async Task ClearItemsOneByOneAsync(DurableTaskClient client, DateTime fromDate, DateTime toDate, List<OrchestrationRuntimeStatus> statusesToPurge)
+        {
+            this.logger.LogInformation("Clearing items one by one, because the bulk purge failed.");
+
+            OrchestrationQuery filter = new OrchestrationQuery()
+            {
+                CreatedFrom = fromDate,
+                CreatedTo = toDate,
+                Statuses = statusesToPurge,
+            };
+
+            var asyncPageable = client.GetAllInstancesAsync(filter);
+
+
+            await foreach (OrchestrationMetadata instance in asyncPageable)
+            {
+                this.logger.LogInformation($"Purging instance {instance.InstanceId} (name: {instance.Name})...");
+                await client.PurgeInstanceAsync(instance.InstanceId, CancellationToken.None).ConfigureAwait(false);
+                this.logger.LogInformation($"Purged instance {instance.InstanceId} (name: {instance.Name}).");
+            }
         }
 
         /// <summary>
@@ -147,7 +184,7 @@ namespace PurgeHistoryExample
             }
         }
 
-        private async Task ClearItemsAsync(DurableTaskClient client, DateTime fromDate, DateTime toDate, IEnumerable<OrchestrationRuntimeStatus> runtimeStatus)
+        private async Task ClearItemsAsyncUsingPurgeAllInstances(DurableTaskClient client, DateTime fromDate, DateTime toDate, IEnumerable<OrchestrationRuntimeStatus> runtimeStatus)
         {
             this.logger.LogInformation($"Purging history and instance table of task hub '{client.Name}' for {runtimeStatus} items created between {fromDate:yyyy-MM-ddTHH:mm:ssZ} and {toDate:yyyy-MM-ddTHH:mm:ssZ}, " +
                 $"using client of type {client.GetType().FullName}.");
