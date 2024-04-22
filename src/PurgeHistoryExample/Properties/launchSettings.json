@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "PurgeHistoryExample": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7207"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 30771,
+      "useSSL": false
+    }
+  }
+}

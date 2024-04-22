@@ -1,0 +1,21 @@
+### You can using this file with Visual Studio Code and the REST Client Extension, to eaisy send requests.
+
+### Send a requet to the HTTP EndPoint of the IPP.
+POST http://localhost:8080/api/Function1_HttpStart
+Content-Type: application/json
+
+### Trigger timer function locally
+POST http://localhost:8080/admin/functions/PurgeHistoryTimer
+Content-Type: application/json
+x-functions-key: <your key>
+
+{
+    "schedule":{
+    },
+    "scheduleStatus": {
+        "last":"2016-10-04T10:15:00+00:00",
+        "lastUpdated":"2016-10-04T10:16:00+00:00",
+        "next":"2016-10-04T10:20:00+00:00"
+    },
+    "isPastDue":false
+}
